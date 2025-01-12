@@ -4,29 +4,15 @@ const session = require("express-session");
 const { sendOtp } = require("../utils/otpSender");
 const router = express.Router();
 const otpStore = {};
-const fs = require("fs");
-const path = require("path");
 
 // Initialize Firebase Admin SDK
-// const serviceAccount = require("../Config/serviceAccountKey.json");
-// if (!admin.apps.length) {
-//   admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount),
-//   });
-// }
-const serviceAccountPath = path.resolve(__dirname, "../config/serviceAccountKey.json");
-
-if (fs.existsSync(serviceAccountPath)) {
-  const serviceAccount = require(serviceAccountPath);
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  }
-} else {
-  console.error("Missing serviceAccountKey.json file. Ensure it exists in the Config/ directory.");
-  process.exit(1); // Exit the app if the file is missing
+const serviceAccount = require("../config/serviceAccountKey.json");
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
 }
+
 // Configure session middleware
 router.use(
   session({
