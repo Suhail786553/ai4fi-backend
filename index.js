@@ -13,6 +13,12 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
+
+// app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions)); // Handle preflight OPTIONS requests
+
+
+
 app.use(express.json());
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -69,6 +75,25 @@ app.get("/api/backup", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+//model generation
+app.post('/proxy/generate-model', async (req, res) => {
+  try {
+    const response = await fetch('http://52.66.24.190/generate-model', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying request:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // app.use('/api', paymentRoutes);
 app.use("/api/auth", authRoutes); // Separate auth route
 app.use('/api/auth', loginRoute);
