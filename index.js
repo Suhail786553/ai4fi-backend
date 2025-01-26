@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 require("dotenv").config();
 // const psprt=require("./Config/psprt");
 // const paymentRoutes = require('./routes/PaymentRoutes');
@@ -111,6 +112,27 @@ app.post('/proxy/generate-model', async (req, res) => {
 
     const data = await response.json();
     res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Error proxying request:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+// for virtual try on
+app.use(bodyParser.json({ limit: '200mb' }));
+app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
+app.post('/proxy/virtual-try-on', async (req, res) => {
+  try {
+    console.log("Compressed file size:", compressedFile.size / 1024, "KB"); // Size in KB
+    const response = await fetch('http://52.66.24.190:8000/virtual-try-on', {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+      },
+      body: JSON.stringify(req.body), // Forward the body from the frontend
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data); // Send the response back to the frontend
   } catch (error) {
     console.error('Error proxying request:', error);
     res.status(500).send('Internal Server Error');
