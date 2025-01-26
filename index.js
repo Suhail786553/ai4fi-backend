@@ -20,14 +20,24 @@ app.use(cors());
 
 
 app.use(express.json());
+// mongoose
+//   .connect(process.env.MONGO_URI, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => console.log("MongoDB connected"))
+//   .catch((err) => console.error(err));
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000, // Set a longer timeout
   })
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error(err));
-
+  .then(() => console.log("MongoDB connected successfully"))
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err.message || err);
+    process.exit(1); // Exit process if DB connection fails
+  });
 // CORS options for development
 const corsOptions = {
   origin: ["https://ai4fi.netlify.app/", "http://localhost:5173"], // Add localhost
