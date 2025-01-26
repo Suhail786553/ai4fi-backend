@@ -40,30 +40,43 @@ app.use(cors(corsOptions));
 
 // Contact schema
 const contactSchema = new mongoose.Schema({
-  name: String,
-  company: String, // Company name
-  phone: String, // Contact phone number
-  email: String,
-  subject: String,
-  message: String,
+  name: { type: String, required: true },
+  company: { type: String },
+  phone: { type: String },
+  email: { type: String, required: true },
+  subject: { type: String },
+  message: { type: String, required: true },
   date: { type: Date, default: Date.now },
 });
+
 
 const Contact = mongoose.model("Contact", contactSchema);
 
 // POST route to save contact form submissions
 app.post("/api/about", async (req, res) => {
-  console.log("Received data:", req.body)
+  console.log("Incoming request body:", req.body); // Log the request payload
   try {
     const { name, company, phone, email, subject, message } = req.body;
+
+    // Check for missing fields
+    if (!name || !email || !message) {
+      console.error("Validation error: Missing required fields");
+      return res.status(400).send("Missing required fields");
+    }
+
+    // Attempt to save to the database
     const newContact = new Contact({ name, company, phone, email, subject, message });
     await newContact.save();
+    console.log("Contact saved successfully:", newContact);
+
     res.status(201).send("Contact saved successfully");
   } catch (error) {
-    console.error("Error saving contact:", error);
+    console.error("Error in /api/about route:", error.message || error); // Log the error
     res.status(500).send("Server error");
   }
 });
+
+
 
 // GET route to fetch all form submissions for backup
 app.get("/api/backup", async (req, res) => {
