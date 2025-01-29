@@ -94,7 +94,7 @@ app.post('/proxy/generate-model', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-
+// routes for virtual-try-on
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, 'uploads');
@@ -127,9 +127,11 @@ app.post('/proxy/virtual-try-on', upload.fields([
     req.files['model_image'].forEach((file) => {
       formData.append('model_image', fs.createReadStream(file.path));  // Ensure the file path is used correctly
     });
-    
+    console.log(req.files);
+    console.log(req.body);
     // Append garment image
     formData.append('garment_image', fs.createReadStream(req.files['garment_image'][0].path));
+
     
     // Append category
     formData.append('category', req.body.category || '');  // Ensure category is set
