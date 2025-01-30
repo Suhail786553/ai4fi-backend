@@ -7,6 +7,8 @@ require("dotenv").config();
 const fs = require('fs');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
+const Model = require("./models/Model");
+const router = express.Router();
 
 const authRoutes = require("./routes/signup"); // For signup
 const loginRoute = require("./routes/login");
@@ -122,7 +124,7 @@ app.post('/proxy/virtual-try-on', upload.fields([
     }
 
     const formData = new FormData();
-    
+
     // Append model images
     req.files['model_image'].forEach((file) => {
       formData.append('model_image', fs.createReadStream(file.path));  // Ensure the file path is used correctly
@@ -132,7 +134,7 @@ app.post('/proxy/virtual-try-on', upload.fields([
     // Append garment image
     formData.append('garment_image', fs.createReadStream(req.files['garment_image'][0].path));
 
-    
+
     // Append category
     formData.append('category', req.body.category || '');  // Ensure category is set
 
@@ -183,6 +185,49 @@ app.post('/proxy/virtual-try-on', upload.fields([
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
+// save models
+app.post("/api/save-model", async (req, res) => {
+  try {
+    console.log("Incoming Request Data:", req.body);
+    const { userId, modelConfig, imageUrl } = req.body;
+
+    if (!userId || !modelConfig || !imageUrl) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Save model to MongoDB (example)
+    const newModel = new Model({
+      userId,
+      modelConfig,
+      imageUrl,
+      createdAt: new Date(),
+    });
+
+    await newModel.save();
+    res.status(201).json({ message: "Model saved successfully!" });
+  } catch (error) {
+    console.error("Error saving model:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/api/get-models", async (req, res) => {
+  try {
+    const { userId } = req.query;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const models = await Model.find({ userId });
+
+    res.status(200).json(models);
+  } catch (error) {
+    console.error("Error fetching models:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 // Auth routes
 app.use("/api/auth", authRoutes); // Separate auth route
