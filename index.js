@@ -227,6 +227,16 @@ app.get("/api/get-models", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+// delete model
+app.delete("/api/delete-model/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Model.findByIdAndDelete(id); // Remove from DB
+    res.status(200).json({ message: "Model deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete model" });
+  }
+});
 
 
 // Auth routes
